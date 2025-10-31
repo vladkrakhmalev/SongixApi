@@ -261,9 +261,7 @@ export class AuthController {
       const user = req.user as User | undefined
 
       if (!user) {
-        res.redirect(
-          `${FRONTEND_URL}/google-callback?auth=error&message=authentication_failed`
-        )
+        res.redirect(`${FRONTEND_URL}/400`)
         return
       }
 
@@ -282,12 +280,10 @@ export class AuthController {
 
       setAuthCookies(res, accessToken, refreshToken)
 
-      res.redirect(`${FRONTEND_URL}/google-callback?auth=success`)
+      res.redirect(FRONTEND_URL)
     } catch (error) {
       console.error('Google callback error:', error)
-      res.redirect(
-        `${FRONTEND_URL}/google-callback?auth=error&message=server_error`
-      )
+      res.redirect(`${FRONTEND_URL}/500`)
     }
   }
 }
