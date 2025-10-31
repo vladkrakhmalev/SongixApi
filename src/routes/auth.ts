@@ -138,7 +138,7 @@ router.post('/login', AuthController.login)
 
 /**
  * @openapi
- * /api/auth/profile:
+ * /api/auth/me:
  *   get:
  *     summary: Получить профиль пользователя
  *     security:
@@ -182,7 +182,7 @@ router.post('/login', AuthController.login)
  *                   type: string
  *                   example: "User not found"
  */
-router.get('/profile', authenticateToken, AuthController.getProfile)
+router.get('/me', authenticateToken, AuthController.getMe)
 
 /**
  * @openapi
