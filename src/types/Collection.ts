@@ -1,17 +1,15 @@
 import { Optional } from 'sequelize'
 
-export interface ICollection {
-  id: string
-  title: string
-  ownerId: string
-}
-
 export interface CollectionAttributes {
   id: number
   title: string
   owner_id: number
   created_at?: Date
   updated_at?: Date
+}
+
+export interface ICollection extends CollectionAttributes {
+  songs_count: number
 }
 
 export interface CollectionCreationAttributes

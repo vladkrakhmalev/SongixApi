@@ -1,12 +1,27 @@
 import { Request, Response } from 'express'
 import Collection from '../models/Collection'
+import Song from '../models/Song'
 import {
   CollectionCreationAttributes,
   CollectionFilters,
   CollectionUpdateData,
+  ICollection,
 } from '../types/Collection'
 
 class CollectionController {
+  private static async getCollectionWithSongsCount(
+    collection: Collection
+  ): Promise<ICollection> {
+    const songs_count = await Song.count({
+      where: { collection_id: collection.id },
+    })
+
+    return {
+      ...collection.toJSON(),
+      songs_count,
+    }
+  }
+
   static async create(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.userId
@@ -23,7 +38,9 @@ class CollectionController {
 
       const collection = await Collection.createCollection(collectionData)
 
-      res.status(201).json(collection)
+      const collectionWithSongsCount =
+        await CollectionController.getCollectionWithSongsCount(collection)
+      res.status(201).json(collectionWithSongsCount)
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error'
@@ -50,7 +67,13 @@ class CollectionController {
 
       const collections = await Collection.findAllCollections(filters)
 
-      res.json(collections)
+      const collectionsWithSongsCount = await Promise.all(
+        collections.map(collection =>
+          CollectionController.getCollectionWithSongsCount(collection)
+        )
+      )
+
+      res.json(collectionsWithSongsCount)
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error'
@@ -85,7 +108,9 @@ class CollectionController {
         return
       }
 
-      res.json(collection)
+      const collectionWithSongsCount =
+        await CollectionController.getCollectionWithSongsCount(collection)
+      res.json(collectionWithSongsCount)
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error'
@@ -133,7 +158,11 @@ class CollectionController {
 
       const updatedCollection = await collection.updateCollection(updateData)
 
-      res.json(updatedCollection)
+      const updatedWithSongsCount =
+        await CollectionController.getCollectionWithSongsCount(
+          updatedCollection
+        )
+      res.json(updatedWithSongsCount)
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error'
