@@ -10,6 +10,7 @@ const ACCESS_JWT_SECRET =
 const REFRESH_JWT_SECRET = process.env['REFRESH_JWT_SECRET']
 const ACCESS_TOKEN_EXPIRES_IN = process.env['ACCESS_JWT_EXPIRES_IN'] || '30m'
 const REFRESH_TOKEN_EXPIRES_IN = process.env['REFRESH_JWT_EXPIRES_IN'] || '7d'
+const FRONTEND_URL = process.env['FRONTEND_URL'] || 'http://localhost:5173'
 
 if (!ACCESS_JWT_SECRET) {
   throw new Error('ACCESS_JWT_SECRET environment variable is required')
@@ -67,7 +68,14 @@ export class AuthController {
 
       const existingUser = await User.findByEmail(email)
       if (existingUser) {
-        res.status(409).json({ error: 'User with this email already exists' })
+        if (existingUser.google_id) {
+          res.status(409).json({
+            error:
+              'User with this email already exists. Please use Google sign-in.',
+          })
+        } else {
+          res.status(409).json({ error: 'User with this email already exists' })
+        }
         return
       }
 
@@ -107,6 +115,14 @@ export class AuthController {
       const user = await User.findByEmail(email)
       if (!user) {
         res.status(401).json({ error: 'Invalid credentials' })
+        return
+      }
+
+      if (!user.password) {
+        res.status(401).json({
+          error:
+            'This account uses Google sign-in. Please use Google to sign in.',
+        })
         return
       }
 
@@ -237,6 +253,41 @@ export class AuthController {
     } catch (error) {
       console.error('Delete account error:', error)
       res.status(500).json({ error: 'Internal server error' })
+    }
+  }
+
+  static async googleCallback(req: Request, res: Response): Promise<void> {
+    try {
+      const user = req.user as User | undefined
+
+      if (!user) {
+        res.redirect(
+          `${FRONTEND_URL}/google-callback?auth=error&message=authentication_failed`
+        )
+        return
+      }
+
+      // @ts-ignore - Known issue with jsonwebtoken types
+      const accessToken = jwt.sign(
+        { userId: user.id, email: user.email },
+        accessSecret,
+        { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
+      )
+      // @ts-ignore - Known issue with jsonwebtoken types
+      const refreshToken = jwt.sign(
+        { userId: user.id, email: user.email },
+        refreshSecret,
+        { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
+      )
+
+      setAuthCookies(res, accessToken, refreshToken)
+
+      res.redirect(`${FRONTEND_URL}/google-callback?auth=success`)
+    } catch (error) {
+      console.error('Google callback error:', error)
+      res.redirect(
+        `${FRONTEND_URL}/google-callback?auth=error&message=server_error`
+      )
     }
   }
 }

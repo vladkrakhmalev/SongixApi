@@ -6,6 +6,7 @@ declare global {
     interface Request {
       userId?: number
       userEmail?: string
+      user?: import('../models/User').User
       cookies?: {
         accessToken?: string
         refreshToken?: string

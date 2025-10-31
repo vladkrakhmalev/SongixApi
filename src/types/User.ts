@@ -3,7 +3,8 @@ import { Optional } from 'sequelize'
 export interface User {
   id: number
   email: string
-  password: string
+  password: string | null
+  google_id: string | null
   created_at: string
   updated_at: string
 }
@@ -11,13 +12,17 @@ export interface User {
 export interface UserAttributes {
   id: number
   email: string
-  password: string
+  password: string | null
+  google_id: string | null
   created_at?: Date
   updated_at?: Date
 }
 
 export interface UserCreationAttributes
-  extends Optional<UserAttributes, 'id' | 'created_at' | 'updated_at'> {}
+  extends Optional<
+    UserAttributes,
+    'id' | 'created_at' | 'updated_at' | 'password' | 'google_id'
+  > {}
 
 export interface CreateUserData {
   email: string

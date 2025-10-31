@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import express from 'express'
 import cookieParser from 'cookie-parser'
+import passport from './config/passport'
 import routes from './routes'
 import { errorHandler, notFound } from './middlewares/errorHandler'
 import { cors } from './middlewares/cors'
@@ -15,6 +16,7 @@ const { admin, adminRouter } = await createAdminJS()
 app.use(cors)
 app.use(express.json())
 app.use(cookieParser())
+app.use(passport.initialize())
 app.use('/api', routes)
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 app.use(admin.options.rootPath, adminRouter)

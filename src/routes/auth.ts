@@ -1,4 +1,5 @@
 import express from 'express'
+import passport from 'passport'
 import { AuthController } from '../controllers/authController'
 import { authenticateToken } from '../middlewares/auth'
 
@@ -233,7 +234,7 @@ router.get('/profile', authenticateToken, AuthController.getProfile)
  *                   type: string
  *                   example: "User not found"
  */
-router.post('/refresh', authenticateToken, AuthController.refreshToken)
+router.post('/refresh', AuthController.refreshToken)
 
 /**
  * @openapi
@@ -266,5 +267,42 @@ router.post('/logout', authenticateToken, AuthController.logout)
  *         description: Пользователь не найден
  */
 router.delete('/account', authenticateToken, AuthController.deleteAccount)
+
+/**
+ * @openapi
+ * /api/auth/google:
+ *   get:
+ *     summary: Инициировать вход через Google
+ *     description: Перенаправляет пользователя на страницу авторизации Google
+ *     responses:
+ *       302:
+ *         description: Редирект на Google OAuth страницу
+ */
+router.get(
+  '/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+  })
+)
+
+/**
+ * @openapi
+ * /api/auth/google/callback:
+ *   get:
+ *     summary: Callback для Google OAuth
+ *     description: Обрабатывает ответ от Google после авторизации. Редиректит пользователя на фронтенд с параметрами успеха/ошибки (JSON-ответ не возвращается).
+ *     responses:
+ *       302:
+ *         description: Редирект на страницу фронтенда после попытки Google OAuth. Информация об успехе/ошибке передаётся через query-параметры/Hash/URL.
+ *       401:
+ *         description: Ошибка аутентификации Google (редирект с параметром ошибки)
+ *       500:
+ *         description: Внутренняя ошибка сервера (редирект с параметром ошибки)
+ */
+router.get(
+  '/google/callback',
+  passport.authenticate('google', { session: false }),
+  AuthController.googleCallback
+)
 
 export default router
