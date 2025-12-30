@@ -1,7 +1,7 @@
 import AdminJS from 'adminjs'
 import AdminJSExpress from '@adminjs/express'
 import AdminJSSequelize from '@adminjs/sequelize'
-import sequelize from '../config/connection'
+import sequelize from './connection'
 
 AdminJS.registerAdapter(AdminJSSequelize)
 

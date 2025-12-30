@@ -6,8 +6,8 @@ import routes from './routes'
 import { errorHandler, notFound } from './middlewares/errorHandler'
 import { cors } from './middlewares/cors'
 import swaggerUi from 'swagger-ui-express'
-import { swaggerSpec } from './docs/swagger'
-import { createAdminJS } from './admin/config'
+import { swaggerSpec } from './config/swagger'
+import { createAdminJS } from './config/admin'
 import { initializeDatabase } from './config/database'
 
 const app = express()

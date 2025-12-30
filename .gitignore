@@ -4,3 +4,4 @@ dist
 database.sqlite
 .adminjs/
 todo.md
+.DS_Store
