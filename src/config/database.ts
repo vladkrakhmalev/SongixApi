@@ -1,6 +1,7 @@
 import sequelize from './connection'
 import '../models/User'
 import '../models/Collection'
+import '../models/Concert'
 
 export const initializeDatabase = async () => {
   try {
